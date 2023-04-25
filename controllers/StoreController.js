@@ -1,5 +1,7 @@
 import express from "express";
 import Store from "../models/Store.js";
+import Item from "../models/Item.js";
+
 const router = express.Router();
 
 // create a new Store
@@ -42,25 +44,66 @@ router.get("/allStores", async (req, res) => {
 router.get("/:id", async (req, res) => {
     const storeID = req.params.id;
     try {
-        const Store = await Store.findById(storeID).select("-storeName");
-        res.status(200).json(Store);
+        const store = await Store.findById(storeID).select("-storeName");
+        res.status(200).json(store);
     } catch (err) {
-        res.status(500).json({ msg: err });
+        res.status(500).json({ msg: err.toString() });
     }
 });
 
-// update a Store by id
-router.put("/:StoreId", async (req, res) => {
+//update a Store by id
+router.put("/update/:id", async (req, res) => {
+    const storeID = req.params.id;
+    const storeDetails = req.body;
+
     try {
-        const Store = await Store.updateStoreById(req.params.StoreId, req.body);
-        res.status(200).json(Store);
+        const store = await Store.findById(storeID);
+        if (!store) {
+            return res.status(404).json({ msg: "Store Not Found" });
+        }
+        for (const [key, value] of Object.entries(storeDetails)) {
+            if (Array.isArray(store[key])) {
+                if (!store[key].every((item) => value.include(item))) {
+                    store[key] = value;
+                }
+                continue;
+            }
+
+            if (store[key] !== value) {
+                store[key] = value;
+            }
+        }
+        await store.save();
+
+        res.status(200).json({ msg: "Store updated Successfully" });
     } catch (err) {
-        res.status(500).json({ msg: err });
+        res.status(500).json({ msg: err.toString() });
     }
 });
+// router.put("/update", async (req, res) => {
+//     const { storeID } = req;
+//     console.log("UpdateStoreID: ", storeID)
+//     try {
+//         const store = await Store.findById(storeID);
+//         if (!store) {
+//             return res.status(404).json({ msg: "User Not Found!" });
+
+//         }
+//         await Store.updateOne(
+//             {
+//                 storeName: req.body.storeName,
+//                 storeLocation: req.body.storeLocation,
+//                 inventory: req.body.inventory,
+//             }
+//         )
+//         res.status(200).json(Store);
+//     } catch (err) {
+//         res.status(500).json({ msg: err });
+//     }
+// });
 
 // delete a Store by id
-router.delete("/:StoreId", async (req, res) => {
+router.delete("/delete/:id", async (req, res) => {
     try {
         const Store = await Store.deleteStoreById(req.params.StoreId);
         res.status(200).json(Store);
@@ -68,5 +111,53 @@ router.delete("/:StoreId", async (req, res) => {
         res.status(500).json({ msg: err });
     }
 });
+
+router.put("/:id/addItem", async (req, res) => {
+    const storeID = req.params.id;
+    console.log("StoreID: ", storeID);
+    const { itemName, itemImg, itemDesc, itemCategory, itemPrice, itemStock, itemRestockCount, restockStatus } = req.body;
+
+    try {
+        const store = await Store.findById(storeID);
+        console.log("Store is: ", store);
+        if (!store) {
+            console.log(`Store with ID ${storeID} not found`);
+            return res.status(404).json({ msg: "Store not found." });
+        }
+
+        try {
+            console.log("Store Middle: ", store)
+            const newItem = await Item.create({
+                itemName,
+                itemImg,
+                itemDesc,
+                itemCategory,
+                itemPrice,
+                itemStock,
+                itemRestockCount,
+                restockStatus,
+                storeID,
+            });
+            store.inventory.push(newItem);
+            await store.save();
+            res.status(200).json({
+                msg: "Item added successfully!",
+                newItem,
+            });
+
+        } catch (err) {
+            console.log("Error creating new item:", err);
+            console.log("Store After1: ", store);
+            res.status(500).json({ msg: err.toString() });
+        }
+        console.log("Store After2: ", store);
+
+    } catch (err) {
+        console.log(`Error finding store with ID ${storeID}:`, err);
+        res.status(500).json({ msg: err.toString() });
+    }
+});
+
+
 
 export default router;

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import Store from "./Store.js";
 
 const itemSchema = new mongoose.Schema({
     itemName: {
@@ -55,17 +56,20 @@ const itemSchema = new mongoose.Schema({
 
 itemSchema.pre("save", async function (next) {
     try {
-        const store = await mongoose.model('Store').findById(this.storeID);
+        const store = await mongoose.model("Store").findById(this.storeID);
+        console.log("Item StoreID:", this.storeID);
+        console.log("Item Store:", store);
         if (!store) {
             throw new Error("Store not found.");
         }
-        this.storeName = store._id;
+        this.storeName = store.storeName;
         this.updatedAt = Date.now();
         next();
     } catch (error) {
         next(error);
     }
 });
+
 
 const Item = mongoose.model("Item", itemSchema);
 
