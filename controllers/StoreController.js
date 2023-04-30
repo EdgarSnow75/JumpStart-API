@@ -33,7 +33,7 @@ router.post("/create", async (req, res) => {
 router.get("/allStores", async (req, res) => {
     try {
         let stores;
-        stores = await Store.find().select("-storeName");
+        stores = await Store.find().select("-updatedAt");
         res.status(200).json(stores);
     } catch (err) {
         res.status(500).json({ msg: err });
@@ -44,7 +44,7 @@ router.get("/allStores", async (req, res) => {
 router.get("/:id", async (req, res) => {
     const storeID = req.params.id;
     try {
-        const store = await Store.findById(storeID).select("-storeName");
+        const store = await Store.findById(storeID).select("-updatedAt");
         res.status(200).json(store);
     } catch (err) {
         res.status(500).json({ msg: err.toString() });
@@ -80,38 +80,37 @@ router.put("/update/:id", async (req, res) => {
         res.status(500).json({ msg: err.toString() });
     }
 });
-// router.put("/update", async (req, res) => {
-//     const { storeID } = req;
-//     console.log("UpdateStoreID: ", storeID)
-//     try {
-//         const store = await Store.findById(storeID);
-//         if (!store) {
-//             return res.status(404).json({ msg: "User Not Found!" });
-
-//         }
-//         await Store.updateOne(
-//             {
-//                 storeName: req.body.storeName,
-//                 storeLocation: req.body.storeLocation,
-//                 inventory: req.body.inventory,
-//             }
-//         )
-//         res.status(200).json(Store);
-//     } catch (err) {
-//         res.status(500).json({ msg: err });
-//     }
-// });
 
 // delete a Store by id
 router.delete("/delete/:id", async (req, res) => {
+    const storeID = req.params.id;
     try {
-        const Store = await Store.deleteStoreById(req.params.StoreId);
-        res.status(200).json(Store);
+        await Store.findByIdAndDelete(storeID);
+        res.status(200).json({ msg: "Store deleted successfully!" });
     } catch (err) {
-        res.status(500).json({ msg: err });
+        res.status(500).json({ msg: err.toString() });
     }
 });
 
+
+//Items
+
+// get inventory of a Store by id
+router.get("/:id/inventory", async (req, res) => {
+    const storeID = req.params.id;
+    try {
+        const store = await Store.findById(storeID).populate("inventory");
+        if (!store) {
+            return res.status(404).json({ msg: "Store Not Found" });
+        }
+        res.status(200).json(store.inventory);
+    } catch (err) {
+        res.status(500).json({ msg: err.toString() });
+    }
+});
+
+
+//Add Items to a store's inventory
 router.put("/:id/addItem", async (req, res) => {
     const storeID = req.params.id;
     console.log("StoreID: ", storeID);
@@ -158,6 +157,27 @@ router.put("/:id/addItem", async (req, res) => {
     }
 });
 
+//Get All Items
+router.get("/items/allItems", async (req, res) => {
+    try {
+        let items;
+        items = await Item.find().select("-createdAt");
+        res.status(200).json(items);
+    } catch (err) {
+        res.status(500).json({ msg: err });
+    }
+});
+
+//Delete an item
+router.delete("/items/delete/:id", async (req, res) => {
+    const itemID = req.params.id;
+    try {
+        await Item.findByIdAndDelete(itemID);
+        res.status(200).json({ msg: "Item Deleted Successfully" });
+    } catch (err) {
+        res.status(500).json({ msg: err });
+    }
+})
 
 
 export default router;
