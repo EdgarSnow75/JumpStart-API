@@ -71,11 +71,9 @@ export const checkPassword = async (req, res, next) => {
         switch (userType) {
             case "customer":
                 userData = await Customer.findOne({ emailAddress });
-                console.log(userData.emailAddress, userType, password);
                 break;
             case "admin":
                 userData = await Admin.findOne({ emailAddress });
-                console.log(userData.emailAddress, userType, password);
                 break;
         }
 
@@ -102,7 +100,6 @@ export const checkPassword = async (req, res, next) => {
 // Middleware to get user data
 export const getUserData = async (req, res, next) => {
     const { userId } = req;
-    console.log("userID: ", userId);
     // Get user data
     try {
         const userType = (await Customer.exists({ _id: userId }))
@@ -122,7 +119,6 @@ export const getUserData = async (req, res, next) => {
 
         // Set user data
         req.userData = { ...userData._doc, userType };
-        console.log("userData: ", req.userData)
         next();
     } catch (err) {
         res.status(500).json({ msg: err.message });

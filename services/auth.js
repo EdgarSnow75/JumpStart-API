@@ -17,17 +17,10 @@ export const generateRefreshToken = (userId) => {
 
 export const auth = (req, res, next) => {
     // Get token from authorization header
-    console.log("Token Before: ", req.headers.authorization);
-    console.log("Cookie Before: ", req.cookies?.access_token);
-    // const token =
-    //     req.headers?.authorization.split(" ")[1] || req.cookies?.["access_token"];
-    // const token = req.cookies?.access_token;
     const token = req.headers?.authorization?.split(" ")[1] || req.cookies?.access_token;
-    console.log("Token is: ", token);
 
     // Check if token exists
     if (!token) {
-        console.log("Token After: ", token);
         return res.status(401).json({ msg: "No token, authorization denied" });
     }
 
