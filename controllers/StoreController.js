@@ -41,7 +41,7 @@ router.get("/allStores", async (req, res) => {
 });
 
 // get a Store by id
-router.get("/:id", async (req, res) => {
+router.get("/stores/:id", async (req, res) => {
     const storeID = req.params.id;
     try {
         const store = await Store.findById(storeID).select("-updatedAt");

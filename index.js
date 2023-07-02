@@ -6,6 +6,8 @@ import adminRoutes from "./controllers/AdminController.js"
 import customerRoutes from "./controllers/CustomerController.js";
 import userRoutes from "./controllers/UserController.js";
 import storeRoutes from "./controllers/StoreController.js";
+import cartRoutes from "./controllers/CartController.js";
+import itemRoutes from "./controllers/ItemController.js";
 import cookieParser from "cookie-parser"
 
 
@@ -43,6 +45,8 @@ app.use("/api/user", userRoutes);
 app.use("/api/customer", customerRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/store", storeRoutes);
+app.use("/api/cart", cartRoutes);
+app.use("/api/items", itemRoutes);
 
 
 app.listen(3000, () => {

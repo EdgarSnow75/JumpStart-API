@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import Store from "./Store.js";
 
 const itemSchema = new mongoose.Schema({
     itemName: {

@@ -18,8 +18,8 @@ export const generateRefreshToken = (userId) => {
 export const auth = (req, res, next) => {
     // Get token from authorization header
     const token = req.headers?.authorization?.split(" ")[1] || req.cookies?.access_token;
-
-    // Check if token exists
+    console.log('Token: ', token);
+    // Check if token exists    
     if (!token) {
         return res.status(401).json({ msg: "No token, authorization denied" });
     }
